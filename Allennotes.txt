@@ -1,0 +1,237 @@
+ cd /d D:\LiMVPapp\github\AllenMvpPingShui
+
+git status
+git add .
+
+git add PingShuiPaymnent/
+
+
+git remote remove origin
+git remote add origin https://github.com/liliwjob-hub/liwengstudy-lab.git
+git push -u origin main --force
+
+git log -1
+git show
+
+git status
+
+git ls-files
+
+git commit -m "Add new folder PingShuiPaymnent"
+
+git push origin main
+
+https://github.com/liwengstudy-lab/AllenMvpPingShui.git/
+
+login
+git remote set-url origin https://github.com/liliwjob-hub/liwengstudy-lab.git
+git remote -v
+git push origin main --force
+
+git config user.name
+git config user.email
+
+
+
+============
+cd D:\LiMVPapp\PingShuiPaymnent
+
+
+npm install -g expo-cli
+npm install -g eas-cli
+
+npm install
+
+npx expo login
+
+eas build:configure
+
+eas.json
+
+eas build -p android --profile preview
+
+Generate a new Android Keystore?
+
+type: Y (yes)
+
+Download: https://expo.dev/artifacts/xxxx/app.apk
+
+If you don’t get APK, edit eas.json:
+{
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  }
+}
+
+
+
+{
+  "expo": {
+    "name": "PingShui App",
+    "slug": "pingshui",
+    "version": "1.0.0"
+  }
+}
+
+
+npm install -g eas-cli
+
+npx expo logout
+npx expo login
+"buildType": "apk"
+
+cd project
+npm install
+eas build:configure
+eas build -p android --profile preview
+→ get link → share ✅
+
+
+=================
+
+
+cd D:\LiMVPapp\github\AllenMvpPingShui\AllenMvpPingShui
+git remote set-url origin https://github.com/liliwjob-hub/liwengstudy-lab.git
+
+git remote -v
+
+git branch
+git push -u origin main
+
+git push -u origin main --force
+
+or 
+
+git pull origin main --rebase
+git push origin main
+
+git push -u origin main --force
+
+git push --force
+Open .gitignore and REMOVE:
+node_modules/
+.expo/
+
+
+git add -f node_modules
+git add -f .expo
+
+=====================
+
+
+git remote -v
+You’ll see something like:
+origin https://github.com/liwengstudy-lab/AllenMvpPingShui.git
+replace
+git remote set-url origin https://github.com/liliwjob-hub/liwengstudy-lab.git
+
+it should show origin https://github.com/liliwjob-hub/liwengstudy-lab.git ✅
+
+https://github.com/new
+set owner Owner: liliwjob-hub
+Repo name: liwengstudy-lab
+Click Create repository
+swith to liwengstudy-lab repo
+
+
+D:\LiMVPapp\github
+git clone https://github.com/liwengstudy-lab/AllenMvpPingShui.git
+cd AllenMvpPingShui
+xcopy D:\LiMVPapp\* . /E /I /Y
+git add .
+
+git commit -m "Upload files from LiMVPapp"
+
+
+cd /d D:\LiMVPapp\PingShuiPaymnent
+
+npm run start
+
+git push origin main
+
+=================================================================
+npm run web
+
+============
+
+One-time setup (if you have not installed yet)
+
+cd /d D:\LiMVPapp\PingShuiPaymnent
+npm install
+npx expo install --fix
+node scripts\create-placeholder-assets.js
+
+if do any fix later do run: 
+npx expo start -c
+
+
+A) Run on laptop (web browser)
+cd /d D:\LiMVPapp\PingShuiPaymnent
+npm run web
+npm run start
+npx expo start --web
+Browser should open (often http://localhost:8081). If not, press w in the Expo terminal.
+
+
+B) Run on phone with Expo Go (SDK 54)
+1 cd /d D:\LiMVPapp\PingShuiPaymnent
+npm run start
+2. On phone: open Expo Go → Scan QR code → scan the code in the terminal.
+3. If it spins forever or won’t load, use tunnel:
+cd /d D:\LiMVPapp\PingShuiPaymnent
+npm run start:tunnel
+
+Scan the new QR code.
+
+Optional (same Wi‑Fi, Ethernet PC + Wi‑Fi phone):
+
+npm run start:lan
+
+
+=============
+
+
+cd /d D:\LiMVPapp\PingShuiPaymnent
+npx expo start -c
+
+
+or 
+
+npm run start
+
+
+Web works but phone spins almost always means the phone cannot reach your PC over the network (common with Ethernet PC + Wi‑Fi phone), not that you used the wrong command.
+
+Do this for Expo Go on phone
+Step 1 — stop the current server
+In CMD press Ctrl + C.
+
+Step 2 — start with tunnel (best fix):
+
+
+cd /d D:\LiMVPapp\PingShuiPaymnent
+npx expo start --tunnel -c
+
+OR
+
+npm run start:tunnel
+
+
+Step 3 — on phone
+Expo Go → Scan QR code → scan the new QR from tunnel mode.
+
+Wait 1–3 minutes on first load (tunnel is slower than web).
+
+If tunnel is slow / fails
+npx expo start --lan -c
+npx expo start -c
+Normal (same network works)
+npx expo start --tunnel -c
+Use this now — phone hanging
+npx expo start --web
+Laptop browser only (already works for you)
+
