@@ -1,5 +1,11 @@
  cd /d D:\LiMVPapp\github\AllenMvpPingShui
+git add .
+git commit -m "Add all files and folders for PingShuiPayment"
 
+git push origin main
+
+
+---------------------
 git status
 git add .
 
