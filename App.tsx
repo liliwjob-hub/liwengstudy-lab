@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as Speech from 'expo-speech';
 import { PracticeScreen } from './src/screens/PracticeScreen';
 import { SessionScreen } from './src/screens/SessionScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
@@ -61,6 +62,11 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [userPaid, setUserPaidState] = useState(false);
   const [trialActive, setTrialActive] = useState(true);
+
+  useEffect(() => {
+    // Safety: never allow queued TTS to survive reloads/navigation glitches.
+    Speech.stop();
+  }, []);
 
   useEffect(() => {
     let mounted = true;

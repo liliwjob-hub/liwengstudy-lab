@@ -21,8 +21,7 @@ export const MUSIC_TRACKS: MusicTrack[] = [
     id: 'piano2',
     labelZh: '鋼琴 2',
     labelEn: 'Piano 2',
-    // File on disk is named paino2.mp3
-    source: require('../../music/paino2.mp3'),
+    source: require('../../music/piano2.mp3'),
   },
   {
     id: 'piano3',

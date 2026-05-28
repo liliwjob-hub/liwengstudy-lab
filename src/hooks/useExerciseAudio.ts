@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Audio } from 'expo-av';
 import * as Speech from 'expo-speech';
-import { getMusicTrack, type MusicTrackId } from '../constants/music';
 import {
   ARM_BACK_MS,
   ARM_FRONT_MS,
@@ -13,56 +11,18 @@ import { COUNT_SPEED_DEFAULT } from '../storage/audioPreferencesStorage';
 export type PingShuaiCountPhase = 1 | 2 | 3 | 4 | 5;
 
 export type ExerciseAudioOptions = {
-  musicTrackId?: MusicTrackId;
   countSpeed?: number;
 };
 
 export function useExerciseAudio(active: boolean, options: ExerciseAudioOptions = {}) {
-  const musicTrackId = options.musicTrackId ?? 'piano1';
   const countSpeed = options.countSpeed ?? COUNT_SPEED_DEFAULT;
 
   const [countPhase, setCountPhase] = useState<PingShuaiCountPhase>(1);
+  const activeRef = useRef(active);
+  activeRef.current = active;
   const countIndexRef = useRef(0);
   const cycleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const soundRef = useRef<Audio.Sound | null>(null);
-
-  const unloadPiano = useCallback(async () => {
-    if (!soundRef.current) return;
-    try {
-      await soundRef.current.stopAsync();
-      await soundRef.current.unloadAsync();
-    } catch {
-      /* ignore */
-    }
-    soundRef.current = null;
-  }, []);
-
-  const startLoopingMusic = useCallback(async () => {
-    await unloadPiano();
-    if (musicTrackId === 'none') return;
-
-    const track = getMusicTrack(musicTrackId);
-    if (!track?.source) return;
-
-    try {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        shouldDuckAndroid: true,
-      });
-
-      const { sound } = await Audio.Sound.createAsync(track.source, {
-        isLooping: true,
-        volume: 0.4,
-      });
-      soundRef.current = sound;
-      await sound.playAsync();
-    } catch {
-      /* optional */
-    }
-  }, [musicTrackId, unloadPiano]);
-
   const stopAll = useCallback(async () => {
     if (cycleTimeoutRef.current) {
       clearTimeout(cycleTimeoutRef.current);
@@ -73,8 +33,7 @@ export function useExerciseAudio(active: boolean, options: ExerciseAudioOptions 
       firstTimeoutRef.current = null;
     }
     Speech.stop();
-    await unloadPiano();
-  }, [unloadPiano]);
+  }, []);
 
   useEffect(() => {
     if (!active) {
@@ -83,8 +42,6 @@ export function useExerciseAudio(active: boolean, options: ExerciseAudioOptions 
       countIndexRef.current = 0;
       return;
     }
-
-    void startLoopingMusic();
 
     const countCycleMs = Math.round(COUNT_CYCLE_MS / countSpeed);
     const speakAtBackSwing = Math.round(
@@ -102,6 +59,7 @@ export function useExerciseAudio(active: boolean, options: ExerciseAudioOptions 
         language: 'zh-CN',
         rate: speechRate,
       });
+      // Nudge music to resume after TTS grabs focus on some devices.
     };
 
     const tick = () => {
@@ -119,7 +77,7 @@ export function useExerciseAudio(active: boolean, options: ExerciseAudioOptions 
       }
       void stopAll();
     };
-  }, [active, countSpeed, musicTrackId, startLoopingMusic, stopAll]);
+  }, [active, countSpeed, stopAll]);
 
   return {
     stopAll,

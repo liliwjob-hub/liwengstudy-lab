@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Linking,
   KeyboardAvoidingView,
   Platform,
@@ -7,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -15,7 +17,6 @@ import { colors, spacing } from '../constants/theme';
 import type { RootStackParamList } from '../navigation/types';
 import {
   getOrCreateInstallTimestamp,
-  getTrialDays,
   isTrialActive,
   setUserPaid,
 } from '../storage/subscriptionStorage';
@@ -29,6 +30,8 @@ export function PaywallScreen({ navigation }: Props) {
   const [activationCode, setActivationCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const { width } = useWindowDimensions();
+  const isWide = width >= 720;
 
   // In case user just installed but something went wrong with root logic,
   // we still compute days from install for display.
@@ -77,6 +80,10 @@ export function PaywallScreen({ navigation }: Props) {
 
     if (trimmed === VALID_ACTIVATION_CODE) {
       await setUserPaid(true);
+      Alert.alert(
+        'Activation successful!',
+        'You now have full access.'
+      );
       navigation.reset({
         index: 0,
         routes: [{ name: 'MainTabs' }],
@@ -102,39 +109,51 @@ export function PaywallScreen({ navigation }: Props) {
           enStyle={styles.titleEn}
         />
 
-        <Text style={styles.message}>
-          Your 7-day free trial has ended.{'\n'}
-          Please purchase to continue using the app and support us. Thank you!
-        </Text>
-
-        <Text style={styles.message}>
-          If you have already purchased, please check your email for your activation code and enter it
-          below to unlock the app.
-        </Text>
-
         {info ? <Text style={styles.info}>{info}</Text> : null}
 
-        <Pressable style={styles.purchaseBtn} onPress={handlePurchasePress}>
-          <Text style={styles.purchaseText}>Purchase via Stripe</Text>
-        </Pressable>
+        <View style={[styles.twoCol, !isWide && styles.twoColStack]}>
+          <View style={[styles.section, isWide && styles.sectionLeft]}>
+            <Text style={styles.sectionTitle}>Unlock Full Access</Text>
+            <Text style={styles.message}>
+              Your 7-day free trial has ended.{'\n'}
+              Please purchase to continue using the app and support us. Thank you!
+            </Text>
 
-        <View style={styles.divider} />
+            <Pressable style={styles.purchaseBtn} onPress={handlePurchasePress}>
+              <Text style={styles.purchaseText}>Purchase</Text>
+            </Pressable>
+          </View>
 
-        <Text style={styles.inputLabel}>Activation code</Text>
-        <TextInput
-          style={styles.input}
-          value={activationCode}
-          onChangeText={setActivationCode}
-          autoCapitalize="characters"
-          autoCorrect={false}
-          placeholder="ABCD-1234PINGSH002"
-        />
+          <View style={[styles.divider, isWide ? styles.dividerVertical : styles.dividerHorizontal]} />
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+          <View style={[styles.section, isWide && styles.sectionRight]}>
+            <Text style={styles.sectionTitle}>Activation</Text>
+            <Text style={styles.message}>
+              If you have already purchased and received your activation code by email, please enter it
+              below to unlock the app.
+            </Text>
 
-        <Pressable style={styles.activateBtn} onPress={handleActivate}>
-          <Text style={styles.activateText}>Unlock with Code</Text>
-        </Pressable>
+            <Text style={styles.inputLabel}>Activation code</Text>
+            <TextInput
+              style={styles.input}
+              value={activationCode}
+              onChangeText={(v) => {
+                setActivationCode(v);
+                if (error) setError(null);
+              }}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              placeholder="Enter activation code"
+              placeholderTextColor={colors.textMuted}
+            />
+
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+
+            <Pressable style={styles.activateBtn} onPress={handleActivate}>
+              <Text style={styles.activateText}>Activate</Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -172,13 +191,35 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.sm,
   },
+  twoCol: {
+    marginTop: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  twoColStack: {
+    flexDirection: 'column',
+  },
+  section: {
+    flex: 1,
+  },
+  sectionLeft: {
+    paddingRight: spacing.md,
+  },
+  sectionRight: {
+    paddingLeft: spacing.md,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.primaryDark,
+    marginBottom: spacing.sm,
+  },
   info: {
     fontSize: 12,
     color: colors.textMuted,
     marginBottom: spacing.md,
   },
   purchaseBtn: {
-    marginTop: spacing.md,
     backgroundColor: colors.primary,
     paddingVertical: spacing.md,
     borderRadius: 10,
@@ -189,9 +230,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   divider: {
-    marginVertical: spacing.lg,
-    height: 1,
     backgroundColor: colors.border,
+  },
+  dividerVertical: {
+    width: 1,
+    marginHorizontal: spacing.lg,
+  },
+  dividerHorizontal: {
+    height: 1,
+    marginVertical: spacing.lg,
   },
   inputLabel: {
     fontSize: 13,
@@ -212,7 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   activateBtn: {
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     backgroundColor: colors.primaryDark,
     paddingVertical: spacing.md,
     borderRadius: 10,

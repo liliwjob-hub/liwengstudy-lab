@@ -20,7 +20,6 @@ import {
   getAudioPreferences,
 } from '../storage/audioPreferencesStorage';
 import { getOrCreateInstallTimestamp, getUserPaid, isTrialActive } from '../storage/subscriptionStorage';
-import type { MusicTrackId } from '../constants/music';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Session'>;
 
@@ -47,7 +46,6 @@ export function SessionScreen({ route, navigation }: Props) {
   const [stopModalVisible, setStopModalVisible] = useState(false);
   const [frozenElapsedMs, setFrozenElapsedMs] = useState(0);
   const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
-  const [musicTrackId, setMusicTrackId] = useState<MusicTrackId>('piano1');
   const [countSpeed, setCountSpeed] = useState(COUNT_SPEED_DEFAULT);
 
   const startRef = useRef(new Date());
@@ -55,18 +53,32 @@ export function SessionScreen({ route, navigation }: Props) {
   const savedRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const { stopAll, countPhase } = useExerciseAudio(audioReady && running, {
-    musicTrackId,
-    countSpeed,
-  });
-  elapsedMsRef.current = elapsedMs;
-
   const clearTimer = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   }, []);
+
+  const { stopAll, countPhase } = useExerciseAudio(audioReady && running, { countSpeed });
+  elapsedMsRef.current = elapsedMs;
+
+  // Hard stop audio whenever we leave this screen (back gesture, tab switch, etc.)
+  useEffect(() => {
+    const stopNow = () => {
+      clearTimer();
+      setRunning(false);
+      setStopModalVisible(false);
+      void stopAll();
+    };
+
+    const unsubBlur = navigation.addListener('blur', stopNow);
+    const unsubBeforeRemove = navigation.addListener('beforeRemove', stopNow);
+    return () => {
+      unsubBlur();
+      unsubBeforeRemove();
+    };
+  }, [clearTimer, navigation, stopAll]);
 
   const saveAndFinish = useCallback(
     async (practicedMinutes: number) => {
@@ -101,7 +113,6 @@ export function SessionScreen({ route, navigation }: Props) {
     (async () => {
       const prefs = await getAudioPreferences();
       if (!mounted) return;
-      setMusicTrackId(prefs.musicTrackId);
       setCountSpeed(prefs.countSpeed);
       setAudioReady(true);
       setRunning(true);
@@ -245,7 +256,7 @@ export function SessionScreen({ route, navigation }: Props) {
                     onPress={async () => {
                       setStopModalVisible(false);
                       await stopAll();
-                      navigation.goBack();
+                      navigation.navigate('MainTabs');
                     }}
                   >
                     <BilingualText zh="離開" en="Leave" style={styles.modalBtnText} enStyle={styles.modalBtnText} />
@@ -288,7 +299,7 @@ export function SessionScreen({ route, navigation }: Props) {
                   onPress={async () => {
                     setStopModalVisible(false);
                     await stopAll();
-                    navigation.goBack();
+                    navigation.navigate('MainTabs');
                   }}
                 >
                   <BilingualText zh="離開不儲存" en="Leave without saving" />

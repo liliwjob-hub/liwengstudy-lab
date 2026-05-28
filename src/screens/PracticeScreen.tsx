@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Speech from 'expo-speech';
 import { BilingualText } from '../components/BilingualText';
 import { PingShuaiFigure } from '../components/PingShuaiFigure';
 import { AudioSettingsPanel } from '../components/AudioSettingsPanel';
@@ -14,6 +15,21 @@ import { getOrCreateInstallTimestamp, getUserPaid, isTrialActive } from '../stor
 export function PracticeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
+
+  // Extra safety: ensure silent immediately on mount.
+  useEffect(() => {
+    Speech.stop();
+  }, []);
+
+  // Safety: ensure no lingering count audio after leaving a session.
+  useFocusEffect(
+    React.useCallback(() => {
+      Speech.stop();
+      return () => {
+        Speech.stop();
+      };
+    }, [])
+  );
 
   useEffect(() => {
     let mounted = true;

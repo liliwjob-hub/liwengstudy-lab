@@ -44,6 +44,9 @@ app.post(
     let event;
 
     try {
+      if (!signature || typeof signature !== 'string') {
+        return res.status(400).send('Missing Stripe-Signature header');
+      }
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
@@ -98,19 +101,19 @@ async function sendActivationEmail(to) {
   await transporter.sendMail({
     from,
     to,
-    subject: 'Your Ping Shuai activation code',
+    subject: 'Your Activation Code',
     text: [
       'Thank you for your purchase!',
+      'Your activation code:',
+      ACTIVATION_CODE,
       '',
-      `Your activation code is: ${ACTIVATION_CODE}`,
-      '',
-      'Open the app, go to the unlock screen, and enter this code to unlock full access.',
+      'Please enter this code in the app to unlock full access.',
     ].join('\n'),
     html: `
       <p>Thank you for your purchase!</p>
-      <p>Your activation code is:</p>
+      <p>Your activation code:</p>
       <p style="font-size:20px;font-weight:bold;letter-spacing:1px;">${ACTIVATION_CODE}</p>
-      <p>Open the app, go to the unlock screen, and enter this code to unlock full access.</p>
+      <p>Please enter this code in the app to unlock full access.</p>
     `,
   });
 }
